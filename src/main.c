@@ -4,6 +4,7 @@
 
 #define LED_PIN PB0 // for recv indication
 #define RELAY_SIGNAL_PIN PB1
+#define DIAG_LED_PIN PB2
 
 struct BluetoothCommands {
 	char value;
@@ -31,15 +32,19 @@ void LED_blink() {
 void main(void) {
 	uart0_init();
 	DDRB |= (1 << LED_PIN) | (1 << RELAY_SIGNAL_PIN);
+	PORTB |= (1 << RELAY_SIGNAL_PIN);
+	PORTB &= ~(1 << DIAG_LED_PIN);
 	while(1) {
 		char c = recv_byte();
 		LED_blink();
 		if ( c ==  bt_cmd[POWER_ON].value) {
 			send(bt_cmd[POWER_ON].comment, sizeof(bt_cmd[POWER_ON].comment));
-			PORTB |= (1 << RELAY_SIGNAL_PIN);
+			PORTB &= ~(1 << RELAY_SIGNAL_PIN);
+			PORTB |= (1 << DIAG_LED_PIN);
 		} else if ( c == bt_cmd[POWER_OFF].value) {
 			send(bt_cmd[POWER_OFF].comment, sizeof(bt_cmd[POWER_OFF].comment));
-			PORTB &= ~(1 << RELAY_SIGNAL_PIN);
+			PORTB |= (1 << RELAY_SIGNAL_PIN);
+			PORTB &= ~(1 << DIAG_LED_PIN);
 		}
 		_delay_ms(100);
 	}
